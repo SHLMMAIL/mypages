@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Image Viewer</title>
+    <title>FastPoll</title>
     
     <style>
         body {
@@ -40,38 +40,82 @@
             margin: 0 auto;
         }
         /* Gives the user physical feedback when they tap the image on a phone */
-        .interactive-img:active {
+        .interactive-img[role="button"]:active {
             transform: scale(0.97);
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .counting-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.25);
+            cursor: wait;
+        }
+        .counting-overlay[hidden] { display: none; }
+        .counting-overlay img {
+            display: block;
+            width: min(900px, 85vw);
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
         }
     </style>
     
     <!-- CRITICAL: Preloads the second image so it swaps instantly without a white lag flash -->
     <link rel="preload" href="picture2.jpg" as="image">
+    <link rel="preload" href="FastPoll-Counting-Votes(1).gif" as="image">
 </head>
 <body>
 
     <div class="container">
         <!-- Main display image -->
-        <img id="displayImage" class="interactive-img" src="picture1.jpg" alt="Tap to interact" onclick="swapImage()">
+        <img id="displayImage" class="interactive-img" src="picture1.jpg" alt="FastPoll helicopter poll. Click to vote." role="button" tabindex="0">
+    </div>
+
+    <div id="countingOverlay" class="counting-overlay" role="status"
+         aria-label="Counting votes. Please wait." hidden>
+        <img src="FastPoll-Counting-Votes(1).gif" alt="Counting votes…">
     </div>
 
     <script>
-        // Filenames must match your GitHub files exactly (case-sensitive!)
-        const imageOne = "picture1.jpg";
-        const imageTwo = "picture2.jpg";
+        const displayImage = document.getElementById('displayImage');
+        const overlay = document.getElementById('countingOverlay');
+        let state = 'ready';
 
-        function swapImage() {
-            const imgElement = document.getElementById('displayImage');
-            
-            // Checks the current image source and flips it
-            if (imgElement.src.includes(imageOne)) {
-                imgElement.src = imageTwo;
-            } else {
-                imgElement.src = imageOne;
-            }
+        function countVotes() {
+            // Ignore additional clicks while counting and after results appear.
+            if (state !== 'ready') return;
+            state = 'counting';
+            displayImage.setAttribute('aria-disabled', 'true');
+            document.body.setAttribute('aria-busy', 'true');
+            overlay.hidden = false;
+
+            window.setTimeout(() => {
+                displayImage.src = 'picture2.jpg';
+                displayImage.alt = 'FastPoll voting results and confirmation.';
+                displayImage.removeAttribute('role');
+                displayImage.removeAttribute('tabindex');
+                displayImage.removeAttribute('aria-disabled');
+                displayImage.style.cursor = 'default';
+                overlay.hidden = true;
+                document.body.removeAttribute('aria-busy');
+                state = 'results';
+            }, 3000);
         }
-    </script>
 
+        document.addEventListener('click', countVotes);
+        displayImage.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                countVotes();
+            }
+        });
+    </script>
 </body>
 </html>
