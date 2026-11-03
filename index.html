@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Image Viewer</title>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5; /* Matches Facebook background color */
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            /* Prevents annoying blue highlight blocks when tapping rapidly on mobile */
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .container {
+            text-align: center;
+            max-width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .interactive-img {
+            max-width: 100%;
+            max-height: 90vh;
+            height: auto;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            display: block;
+            margin: 0 auto;
+        }
+        /* Gives the user physical feedback when they tap the image on a phone */
+        .interactive-img:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+    
+    <!-- CRITICAL: Preloads the second image so it swaps instantly without a white lag flash -->
+    <link rel="preload" href="picture2.jpg" as="image">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Main display image -->
+        <img id="displayImage" class="interactive-img" src="picture1.jpg" alt="Tap to interact" onclick="swapImage()">
+    </div>
+
+    <script>
+        // Filenames must match your GitHub files exactly (case-sensitive!)
+        const imageOne = "picture1.jpg";
+        const imageTwo = "picture2.jpg";
+
+        function swapImage() {
+            const imgElement = document.getElementById('displayImage');
+            
+            // Checks the current image source and flips it
+            if (imgElement.src.includes(imageOne)) {
+                imgElement.src = imageTwo;
+            } else {
+                imgElement.src = imageOne;
+            }
+        }
+    </script>
+
+</body>
+</html>
